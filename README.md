@@ -1,6 +1,6 @@
 # PortsManager - CLI Port Scanner & Manager
 
-A lightweight, modern command-line tool for scanning, monitoring, and managing network ports.
+A small modern command-line tool for scanning, monitoring, and managing network ports.
 
 ## Features
 
