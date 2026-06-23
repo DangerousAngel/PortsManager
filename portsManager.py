@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#https://github.com/DangerousAngel
 """
 PortGuard - Modern CLI Port Scanner & Manager
 A lightweight tool to scan, monitor, and manage network ports
@@ -101,8 +101,8 @@ class PortGuard:
         banner = f"""
 {Colors.CYAN}{Colors.BOLD}
 ╔══════════════════════════════════════════════════════════╗
-║                    {Colors.WHITE}🛡️  PortsManager v1.0{Colors.CYAN}                    ║
-║          {Colors.DIM}Modern CLI Port Scanner & Manager{Colors.CYAN}              ║
+║               {Colors.WHITE}   PortsManager v1.0{Colors.CYAN}                       ║
+║             {Colors.DIM}     By@DangerousAngel{Colors.CYAN}                       ║
 ╚══════════════════════════════════════════════════════════╝
 {Colors.END}"""
         print(banner)
@@ -220,12 +220,14 @@ class PortGuard:
         else:
             return "Dynamic/Private Port"
     
-    def display_results(self, results):
+    def display_results(self, results, show_all=False):
         """Display scan results in organized format"""
         self.clear_screen()
         self.print_banner()
         
-        print(f"{Colors.BOLD}{Colors.WHITE}📊 Port Scan Results{Colors.END}\n")
+        # تغيير العنوان بناءً على نوع العرض
+        scan_type = "Full Detailed" if show_all else "Quick"
+        print(f"{Colors.BOLD}{Colors.WHITE}📊 {scan_type} Port Scan Results{Colors.END}\n")
         
         categories = [
             ('Well-Known Ports (0-1023)', 'well_known', Colors.RED),
@@ -243,15 +245,18 @@ class PortGuard:
                 print(f"{Colors.DIM}│{Colors.END} {Colors.WHITE}{'Port':<8} {'Service':<30} {'Status':<12} Category{'':<18}{Colors.DIM}│{Colors.END}")
                 print(f"{Colors.DIM}├{'─' * 78}┤{Colors.END}")
                 
-                for port_info in ports[:10]:  # Show first 10 per category
-                    status_color = Colors.GREEN if port_info['status'] == 'LISTENING' else Colors.RED
+                display_ports = ports if show_all else ports[:10]
+                
+                for port_info in display_ports:
+                    status_color = Colors.GREEN if port_info['status'] in ['LISTENING', 'OPEN'] else Colors.RED
                     service = port_info['service'] or 'Unknown'
                     print(f"{Colors.DIM}│{Colors.END} {color}{port_info['port']:<8}{Colors.END} "
                           f"{Colors.WHITE}{service[:30]:<30}{Colors.END} "
                           f"{status_color}{port_info['status']:<12}{Colors.END} "
                           f"{Colors.DIM}{port_info['category']:<26}{Colors.DIM}│{Colors.END}")
                 
-                if len(ports) > 10:
+
+                if not show_all and len(ports) > 10:
                     print(f"{Colors.DIM}│{Colors.END} {Colors.DIM}... and {len(ports) - 10} more ports{Colors.END}{' ' * 55}{Colors.DIM}│{Colors.END}")
                 
                 print(f"{Colors.DIM}╰{'─' * 78}╯{Colors.END}\n")
@@ -261,7 +266,6 @@ class PortGuard:
         
         if self.blocked_ports:
             print(f"{Colors.YELLOW}⚠️  Blocked Ports: {len(self.blocked_ports)}{Colors.END}")
-    
     def close_port(self, port):
         """Close a specific port using firewall rules"""
         if not self.is_admin():
@@ -380,15 +384,15 @@ class PortGuard:
             
             if choice == '1':
                 results = self.scan_ports(1, 1024, only_active=True)
-                self.display_results(results)
+                self.display_results(results, show_all=False)
                 input(f"\n{Colors.DIM}Press Enter to continue...{Colors.END}")
             
             elif choice == '2':
                 print(f"{Colors.YELLOW}⚠️  Full scan may take several minutes{Colors.END}")
                 confirm = input("Continue? (y/n): ").lower()
                 if confirm == 'y':
-                    results = self.scan_ports(1, 65535, only_active=True)
-                    self.display_results(results)
+                    results = self.scan_ports(1, 65535, only_active=False)
+                    self.display_results(results, show_all=True)
                 input(f"\n{Colors.DIM}Press Enter to continue...{Colors.END}")
             
             elif choice == '3':
